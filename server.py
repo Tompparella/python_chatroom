@@ -28,6 +28,7 @@ def global_msg(msg, index): # A simple broadcast message for all clients.
                 i.send(msg)
             except:
                 print("An error occurred.")
+
 def handle_user(user): # Handles user sent messages.
     while True:
 
@@ -53,11 +54,12 @@ def handle_user(user): # Handles user sent messages.
 
         except: # If the user disconnects, terminate the connection.
             index = users.index(user)
-            users.remove(user)
-            user.close()
             username = usernames[index]
+            users.pop(index)
+            user.close()
             global_msg(f'{username} left the chat'.encode('utf-8'), index)
-            usernames.remove(username)
+            usernames.pop(index)
+            channels.pop(index)
             break
 
 def receive():  # Receive new connections/users
