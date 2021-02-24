@@ -7,6 +7,7 @@ host = '127.0.0.1' # The server's ip and port
 port = 5000
 
 username = input("Username: ")
+channel = input("Channel: ")
 
 print("Welcome!\nSimply type a message to broadcast, or use the form '/w username message' for private messages.\nHave fun!")
 
@@ -20,6 +21,7 @@ def receive():
             msg = user.recv(1024).decode('utf-8')
             if msg == "NAME":
                 user.send(username.encode('utf-8'))
+                user.send(channel.encode('utf-8'))
                 pass
             else:
                 print(msg)

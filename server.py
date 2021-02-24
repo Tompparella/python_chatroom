@@ -17,10 +17,17 @@ users = []
 
 usernames = []
 
-def global_msg(msg): # A simple broadcast message for all clients.
-    for i in users:
-        i.send(msg)
+channels = []
 
+def global_msg(msg, index): # A simple broadcast message for all clients.
+    channel = channels[index]
+    for i in users:
+        u_index = users.index(i)
+        if (channels[u_index] == channel):    # Check if user is in the same channel.
+            try:
+                i.send(msg)
+            except:
+                print("An error occurred.")
 def handle_user(user): # Handles user sent messages.
     while True:
 
@@ -41,34 +48,43 @@ def handle_user(user): # Handles user sent messages.
 
                 private_msg(rec_user, private)
             else:                        # Else broadcast
-                global_msg(msg)
+                index = users.index(user)
+                global_msg(msg, index)
 
         except: # If the user disconnects, terminate the connection.
             index = users.index(user)
             users.remove(user)
             user.close()
             username = usernames[index]
-            global_msg(f'{username} left the chat'.encode('utf-8'))
+            global_msg(f'{username} left the chat'.encode('utf-8'), index)
             usernames.remove(username)
             break
 
 def receive():  # Receive new connections/users
     while True:
+
         user, address = server.accept()
         print(f"Connected with {str(address)}")
         user.send("NAME".encode('utf-8'))
         username = user.recv(1024).decode('utf-8')
+
+        channel = user.recv(1024).decode('utf-8')
+        channels.append(channel)
         usernames.append(username)
         users.append(user)
-        print(f"Clients' username: {username}")
-        global_msg(f"{username} joined the chatroom.".encode('utf-8'))
+        print(f"Clients' username: {username}\nchannel: {channel}")
+
+        global_msg(f"{username} joined the {channel} chatchannel.".encode('utf-8'), users.index(user))
         user.send('Connected to the server!'.encode('utf-8'))
 
         thread = threading.Thread(target=handle_user, args=(user,))
         thread.start()
 
 def private_msg(user, msg): # Send a message to a specific user.
-    user.send(msg)
+    try:
+        user.send(msg)
+    except:
+        print("An error occurred.")
 
 print("Server started")
 receive()
